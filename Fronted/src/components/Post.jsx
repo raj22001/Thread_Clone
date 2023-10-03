@@ -8,9 +8,9 @@ import useShowToast from "../hooks/userShowToast"
 import {DeleteIcon} from "@chakra-ui/icons"
 import { useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
-import { oc } from "date-fns/locale";
 
-const Post = ({post , postedBy , setPosts}) => {
+
+const Post = ({post , postedBy }) => {
     const [user , setuser] = useState(null)
     const showToast = useShowToast()
     const navigate = useNavigate()
@@ -53,7 +53,7 @@ const Post = ({post , postedBy , setPosts}) => {
                 showToast("Error" , data.error , "error");
             }
             showToast("Success" , "Post Deleted" , "success");
-            setPosts((prev) => prev.filter((p) => p._id !== post._id))
+    
         } catch (error) {
             showToast("Error" , error.message , "error");
             return;
