@@ -5,19 +5,18 @@ import userShowToast from "../hooks/userShowToast";
 import { Flex, Spinner } from "@chakra-ui/react";
 import Post from "../components/Post"
 import useGetUserProfile from "../hooks/useGetUserProfile";
+import { useRecoilState } from "recoil";
+import postsAtom from "../atoms/postAtom";
 
 
 const UserPage = () => {
 
   const {user , loading} = useGetUserProfile()
-  const [posts , setPosts] = useState([])
+  const [posts , setPosts] = useRecoilState(postsAtom)
   const [fetchingPosts , setFetchingPosts] = useState(true)
   const {username} = useParams();
   const showToast = userShowToast();
   useEffect(() =>{
-
-    
-
 
     const getPosts = async() =>{
       setFetchingPosts(true)
@@ -36,7 +35,8 @@ const UserPage = () => {
       }
     }
     getPosts()
-  },[username , showToast])
+  },[username , showToast , setPosts])
+  console.log("Post is here and its recoil state->" ,posts )
 
   if(!user && loading){
     return(

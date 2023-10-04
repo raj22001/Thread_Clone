@@ -3,9 +3,11 @@ import {AddIcon} from "@chakra-ui/icons"
 import { useRef, useState } from "react"
 import usePreviewImg from "../hooks/usePreviewImg"
 import { BsFillImageFill } from "react-icons/bs"
-import { useRecoilValue } from "recoil"
+import { useRecoilState, useRecoilValue } from "recoil"
 import userAtom from "../atoms/userAtom"
 import useShowToast from "../hooks/userShowToast"
+import postsAtom from "../atoms/postAtom"
+import { useParams } from "react-router-dom"
 
 const MAX_CHAR = 300;
 
@@ -15,10 +17,12 @@ const CreatePost = () => {
     const [remainingChar , setRemainingChar ] = useState(MAX_CHAR)
     const { isOpen, onOpen, onClose } = useDisclosure()
     const {handlerImageChange, imgUrl , setImgUrl } = usePreviewImg()
-    const user = useRecoilValue(userAtom)
+    const user = useRecoilValue(userAtom);
+    const [posts , setPosts] = useRecoilState(postsAtom)
     console.log("USER is here ->", user);
     const imageRef = useRef(null)
     const showToast = useShowToast();
+    const username = useParams()
 
     const handleTextChange = (e) =>{
         const inputText = e.target.value;
@@ -34,6 +38,7 @@ const CreatePost = () => {
     }
 
     const handleCreatePost = async() =>{
+        setLoading(true)
         try {
             const res = await fetch("/api/post/create",{
 
@@ -52,6 +57,11 @@ const CreatePost = () => {
                 return
             }
             showToast("Success" , "Post Created Successfully" , "success")
+            
+            if(username == user.username){
+                setPosts([data , ...posts])
+            }
+            
             onClose()
             setPostText("");
             setImgUrl("")
@@ -67,11 +77,11 @@ const CreatePost = () => {
         position={"fixed"}
         bottom={10}
         right={10}
-        leftIcon={<AddIcon/>}
         bg={useColorModeValue("gray.300","gray.dark")}
         onClick={onOpen}
+        size={{base:"sm" , sm:"md"}}
     >
-      Post
+        <AddIcon/>
     </Button>
 
     <Modal  isOpen={isOpen} onClose={onClose}>

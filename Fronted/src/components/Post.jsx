@@ -6,15 +6,17 @@ import Action from "./Action"
 import { useEffect, useState } from "react"
 import useShowToast from "../hooks/userShowToast"
 import {DeleteIcon} from "@chakra-ui/icons"
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
+import postsAtom from "../atoms/postAtom";
 
 
 const Post = ({post , postedBy }) => {
-    const [user , setuser] = useState(null)
+    const [user , setUser] = useState(null)
     const showToast = useShowToast()
-    const navigate = useNavigate()
     const currentUser = useRecoilValue(userAtom)
+    const [posts , setPosts] = useRecoilState(postsAtom)
+    const navigate = useNavigate()
 
     console.log("Post is here -> ",post );
 
@@ -24,15 +26,16 @@ const Post = ({post , postedBy }) => {
                 const res = await fetch("/api/users/profile/" + postedBy )
                 
                 const data = await res.json();
-                setuser(data)
                 console.log("user data ->",user)
                 console.log("Post data ->",post)
                 if(data.error){
                     showToast("Error" , data.error , "error")
                     return;
                 }
+                setUser(data)
             } catch (error) {
                 showToast("Error" , error.message , "error")
+                setUser(null)
             }
         }
         getUser();
@@ -50,17 +53,17 @@ const Post = ({post , postedBy }) => {
 
             const data = await res.json();
             if(data.error){
-                showToast("Error" , data.error , "error");
+                return showToast("Error" , data.error , "error");
             }
             showToast("Success" , "Post Deleted" , "success");
-    
+            setPosts(posts.filter((p) => p._id !== post._id))
         } catch (error) {
             showToast("Error" , error.message , "error");
             return;
         }
     }
 
-
+if (!user) return null;
   return (
     <Link to={`/${user?.username}/post/${post?.id}`}>
         <Flex gap={3} mb={4} py={5}>

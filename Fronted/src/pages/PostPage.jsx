@@ -1,29 +1,31 @@
 import { Avatar, Flex,Button ,Image, Text , Box, Divider, Spinner } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import Action from "../components/Action"
 import useGetUserProfile from "../hooks/useGetUserProfile"
 import useShowToast from "../hooks/userShowToast"
 import { useNavigate, useParams } from "react-router-dom"
 import { formatDistanceToNow } from "date-fns"
-import { useRecoilValue } from "recoil"
+import { useRecoilState, useRecoilValue } from "recoil"
 import userAtom from "../atoms/userAtom"
 import { DeleteIcon } from "@chakra-ui/icons"
-
+import postsAtom from "../atoms/postAtom"
+import Comment from "../components/Comment"
 
 const PostPage = () => {
-   
+    
     const {user , loading} = useGetUserProfile();
-    const [post , setPost] = useState(null)
+    const [posts , setPosts] = useRecoilState(postsAtom)
     const showToast = useShowToast();
     const { pid } = useParams();
     console.log("Pid console log ->",pid)
     const currentUser = useRecoilValue(userAtom)
     const navigate = useNavigate();
-
     
+    
+    const currentPost = posts[0];
     useEffect(() =>{
         const getPost = async () =>{
-            setPost([])
+            setPosts([])
             try {
                 const res = await fetch(`/api/post/${pid}`);
                 const data = await res.json();
@@ -32,14 +34,14 @@ const PostPage = () => {
                     showToast("Error" , data.error , "error")
                 }
                 console.log("D -> ",data);
-                setPost([data])
+                setPosts([data])
 
             } catch (error) {
                 showToast("Error" , error.message , "error")
             }
         }
         getPost();
-    },[showToast , pid , setPost])
+    },[showToast , pid , setPosts])
     
     const handleDeletePost =async () =>{
         try {
@@ -68,7 +70,6 @@ const PostPage = () => {
         )
     }
     
-    const currentPost = post[0];
     if(!currentPost) return null;
     console.log("current Post -> " , currentPost)
   return (
@@ -84,7 +85,7 @@ const PostPage = () => {
                 </Flex>
             </Flex>
             <Flex gap={4} alignItems={"center"}>
-                        <Text fontSize={"xs"} width={36} textAlign={"right"} color={"gray.light"}>{post?.createdAt ? `${formatDistanceToNow(new Date(post?.createdAt))} ago ` : "Invalid"}</Text>
+                        <Text fontSize={"xs"} width={36} textAlign={"right"} color={"gray.light"}>{currentPost?.createdAt ? `${formatDistanceToNow(new Date(currentPost?.createdAt))} ago ` : "Invalid"}</Text>
 
                         {
                             currentUser?._id === user?._id && <DeleteIcon size={24} cursor={"pointer"}
@@ -95,10 +96,10 @@ const PostPage = () => {
                     </Flex>
         </Flex>
 
-        <Text my={3}>{post?.text}</Text>
+        <Text my={3}>{currentPost?.text}</Text>
         
         {
-            post.img && (
+            currentPost.img && (
                 <Box 
                     borderRadius={6}
                     overflow={"hidden"}
@@ -111,7 +112,7 @@ const PostPage = () => {
         }
 
         <Flex gap={3} my={3}>
-            <Action post={post}/>
+            <Action post={currentPost}/>
         </Flex>
         <Divider my={4}/>
 
@@ -124,7 +125,13 @@ const PostPage = () => {
         </Flex>
         <Divider my={4}/>
 
-        {post.replies}
+        {currentPost.replies.map((reply) =>(
+            <Comment 
+                key={reply._id}
+                reply = {reply}
+                lastReply = {reply._id === currentPost.replies[currentPost.replies.length - 1]._id}
+            />
+        ))}
     {/*
         <Comment Comment="looks relly good"
         createdAt="12h"
