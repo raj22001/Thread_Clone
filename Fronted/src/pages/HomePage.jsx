@@ -21,7 +21,7 @@ const HomePage = () => {
           return;
         }
 
-        console.log("data is here Homepage -> ",data)
+        //console.log("data is here Homepage -> ",data)
         setPost(data)
 
       } catch (error) {

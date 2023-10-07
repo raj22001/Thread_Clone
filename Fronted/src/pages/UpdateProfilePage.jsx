@@ -31,7 +31,7 @@ import userShowToast from '../hooks/userShowToast';
 
     const showToast = userShowToast();
     const {handlerImageChange, imgUrl } = usePreviewImg()
-    console.log(setInputs, "user is here");
+    //console.log(setInputs, "user is here");
 
 
     const handlerSubmit = async (e) =>{

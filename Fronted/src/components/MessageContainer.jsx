@@ -1,9 +1,86 @@
 import { Avatar, Divider, Flex, Image, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@chakra-ui/react"
 import Message from "./Message"
 import MessageInput from "./MessageInput"
+import useShowToast from "../hooks/userShowToast"
+import { useRecoilState, useRecoilValue } from "recoil"
+import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAtom"
+import { useEffect, useRef, useState } from "react"
+import userAtom from "../atoms/userAtom"
+import { useSocket } from "../context/SocketContext"
 
 
 const MessageContainer = () => {
+
+    const showToast = useShowToast();
+    const [selectedConversation , setSetectedConversation] = useRecoilState(selectedConversationAtom);
+    
+    const [loadingMessage , setLoadingMessage] = useState(true);
+    const [messages , setMessages] = useState([]);
+    const currentUser = useRecoilValue(userAtom);
+    const {socket} = useSocket();
+    const setConversations = useRecoilState(conversationsAtom)
+    const messageEndRef = useRef(null);
+
+
+    useEffect(() =>{
+        socket.on("newMessage" , (message) =>{
+
+            if(selectedConversation._id === message.coversationId){
+                setMessages((prevMessages) => [...prevMessages , message]);
+            }
+
+            setConversations((prev) =>{
+                const updatedConversations = prev.map(conversation =>{
+                    if(conversation._id === message.coversationId){
+                        return{
+                            ...conversation,
+                            lastMessage:{
+                                text:message.text,
+                                sender:message.sender,
+                            },
+                        }
+                    }
+                    return conversation;
+                })
+                return updatedConversations;
+            })
+        })
+        return () => socket.off("newMessage");
+    },[socket])
+
+    useEffect(() => {
+        messageEndRef.current?.scrollIntoView({
+            behavior:"smooth"
+        });
+    },[messages])
+
+
+    useEffect(() =>{
+        const getMessages = async() =>{
+            setLoadingMessage(true)
+            setMessages([])
+            try {
+
+                if(selectedConversation.mock) return
+
+                const res = await fetch(`/api/messages/${selectedConversation.userId}`);
+
+                const data = await res.json();
+
+                if(data.error){
+                    showToast("Error" , data.error , "error")
+                    return;
+                }
+                setMessages(data)
+            } catch (error) {
+                showToast("Error" , error.message , "error"); 
+            }finally{
+                setLoadingMessage(false)
+            }
+        }
+        getMessages()
+    },[showToast , selectedConversation.userId])
+
   return (
     <Flex flex={70}
         bg={useColorModeValue("gray.200" , "gray.dark")}
@@ -14,9 +91,9 @@ const MessageContainer = () => {
       
       { /*<Flex flex={70}>MessageContainer</Flex> */}
         <Flex w={"full"} h={12} alignItems={"center"} gap={2}>
-            <Avatar src="" size={"sm"}/>
+            <Avatar src={selectedConversation?.userProfilePic} size={"sm"}/>
             <Text display={"flex"} alignItems={"center"}>
-                johndoe <Image src="/verified.png" w={4} h={4} ml={1} />
+                {selectedConversation.username} <Image src="/verified.png" w={4} h={4} ml={1} />
             </Text>
         </Flex>
 
@@ -26,7 +103,7 @@ const MessageContainer = () => {
             overflowY={"auto"}
         >
             {
-                false && (
+                loadingMessage && (
                     [...Array(5)].map((_ , i) =>(
                         <Flex key={i} gap={2} alignItems={"center"}
                         p={1} borderRadius={"md"} alignSelf={ i % 2 === 0 ? "flex-start" : "flex-end"}
@@ -43,15 +120,22 @@ const MessageContainer = () => {
                     ))
                 )
             }
-            <Message ownMessage={true}/>
-            <Message ownMessage={false}/>
-            <Message ownMessage={true}/>
-            <Message ownMessage={false}/>
-            <Message ownMessage={false}/>
-            <Message ownMessage={true}/>
+            {
+               !loadingMessage && (
+                messages.map((message) =>(
+                    <Flex key={message._id}
+                        direction={"column"}
+                        ref={messages.length -1 === messages.indexOf(message) ? messageEndRef : null}
+                    >
+
+                        <Message key={message._id}  message={message} ownMessage={currentUser._id === message.sender}/>
+                    </Flex>
+                ))
+               ) 
+            }
         </Flex>
 
-        <MessageInput/>
+        <MessageInput setMessages = {setMessages}/>
     </Flex>
   )
 }

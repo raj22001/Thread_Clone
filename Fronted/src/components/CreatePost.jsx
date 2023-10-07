@@ -19,7 +19,7 @@ const CreatePost = () => {
     const {handlerImageChange, imgUrl , setImgUrl } = usePreviewImg()
     const user = useRecoilValue(userAtom);
     const [posts , setPosts] = useRecoilState(postsAtom)
-    console.log("USER is here ->", user);
+    //console.log("USER is here ->", user);
     const imageRef = useRef(null)
     const showToast = useShowToast();
     const username = useParams()

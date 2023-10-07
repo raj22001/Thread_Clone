@@ -1,6 +1,14 @@
 import { Avatar, Flex, Text } from "@chakra-ui/react"
+import { useRecoilState, useRecoilValue } from "recoil"
+import { selectedConversationAtom } from "../atoms/messagesAtom"
+import userAtom from "../atoms/userAtom";
 
-const Message = ({ownMessage}) => {
+const Message = ({ownMessage , message}) => {
+
+    const selectedConversation = useRecoilState(selectedConversationAtom);
+
+    const user = useRecoilValue(userAtom);
+
   return (
     <>
     {
@@ -13,20 +21,20 @@ const Message = ({ownMessage}) => {
                 <Text maxW={"350px"} bg={"blue.400"}
                     p={1} borderRadius={"md"}
                 >
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsa officia, dicta neque laboriosam, 
+                    {message.text}
                 </Text>
-                <Avatar src="" w={7} h={7} />
+                <Avatar src={user?.profilePic} w={7} h={7} />
             </Flex>
         ) : (
             <Flex
             gap={2}
             
             >
-                <Avatar src="" w={7} h={7} />
+                <Avatar src={selectedConversation?.userProfilePic} w={7} h={7} />
                 <Text maxW={"350px"} bg={"gray.400"}
                     p={1} borderRadius={"md"}
                 >
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsa officia, dicta neque laboriosam, 
+                    {message.text} 
                 </Text>
                 
             </Flex>

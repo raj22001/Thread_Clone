@@ -17,7 +17,7 @@ const PostPage = () => {
     const [posts , setPosts] = useRecoilState(postsAtom)
     const showToast = useShowToast();
     const { pid } = useParams();
-    console.log("Pid console log ->",pid)
+    //console.log("Pid console log ->",pid)
     const currentUser = useRecoilValue(userAtom)
     const navigate = useNavigate();
     

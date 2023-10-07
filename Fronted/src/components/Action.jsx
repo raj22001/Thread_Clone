@@ -13,7 +13,7 @@ import postsAtom from "../atoms/postAtom";
 
 const Action = ({post}) => {
 	const user = useRecoilValue(userAtom)
-	console.log("Post_ is here ->",post)
+	//console.log("Post_ is here ->",post)
 	const [liked , setLiked] = useState(post.likes ? post.likes.includes(user?._id):false);
 	const [isLiking , setIsLiking] = useState(false);
 	const [posts , setPosts] = useRecoilState(postsAtom)
@@ -40,7 +40,7 @@ const Action = ({post}) => {
 			if(data.error){
 				return showToast("Error" , data.error , "error")
 			}
-			console.log(data)
+			//console.log(data)
 
 			if(!liked){
 				const updatedPosts = posts.map((p) =>{
@@ -98,7 +98,7 @@ const Action = ({post}) => {
 
 			showToast("Success" , "Reply posted Successfully" , "success");
 
-			console.log(data);
+			//console.log(data);
 			onClose();
 			setReply("");
 		} catch (error) {

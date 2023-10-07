@@ -18,7 +18,7 @@ const Post = ({post , postedBy }) => {
     const [posts , setPosts] = useRecoilState(postsAtom)
     const navigate = useNavigate()
 
-    console.log("Post is here -> ",post );
+    //console.log("Post is here -> ",post );
 
     useEffect(() =>{
         const getUser = async () =>{
@@ -26,8 +26,8 @@ const Post = ({post , postedBy }) => {
                 const res = await fetch("/api/users/profile/" + postedBy )
                 
                 const data = await res.json();
-                console.log("user data ->",user)
-                console.log("Post data ->",post)
+                //console.log("user data ->",user)
+                //console.log("Post data ->",post)
                 if(data.error){
                     showToast("Error" , data.error , "error")
                     return;
